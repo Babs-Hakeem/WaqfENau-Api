@@ -11,10 +11,6 @@ services:
         value: Production
       - key: ASPNETCORE_URLS
         value: http://+:80
-      - key: ConnectionStrings__DefaultConnection
-        value: Host=ep-polished-hill-a6374v0f-pooler.us-west-2.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_jLJs8z6YqpuO;SSL Mode=Require;Trust Server Certificate=true
-      - key: Jwt__Key
-        value: WaqfENauSuperSecretKey2026ForAhmadiyyaNigeria@@
       - key: Jwt__Issuer
         value: WaqfENauApi
       - key: Jwt__Audience
@@ -27,5 +23,9 @@ services:
         value: "587"
       - key: Email__Username
         value: babshakeem786@gmail.com
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        sync: false
       - key: Email__Password
-        value: cdmt wrco thra awbc
+        sync: false
