@@ -10,6 +10,7 @@ using WaqfENau.Api.Infrastructure.Interfaces.Repositories;
 using WaqfENau.Api.Infrastructure.Interfaces.Services;
 using WaqfENau.Api.WorkerServices;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. CORE SERVICES ---
