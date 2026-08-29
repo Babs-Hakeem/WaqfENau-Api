@@ -14,9 +14,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             _unitOfWork = unitOfWork;
         }
 
-        // ═══════════════════════════════════════════════════════════
-        // SECTION
-        // ═══════════════════════════════════════════════════════════
 
         public async Task<SectionResponse> CreateSectionAsync(CreateSectionRequest request)
         {
@@ -29,10 +26,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 IsPublished = false,
                 IsActive = true
             };
-
             await _unitOfWork.Sections.AddAsync(section);
             await _unitOfWork.SaveChangesAsync();
-
             return MapSection(section, 0);
         }
 
@@ -40,16 +35,13 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var section = await _unitOfWork.Sections.GetByIdAsync(sectionId)
                 ?? throw new Exception("Section not found");
-
             section.Title = request.Title;
             section.Description = request.Description;
             section.OrderIndex = request.OrderIndex;
             section.IsActive = request.IsActive;
             section.UpdatedAt = DateTime.UtcNow;
-
             _unitOfWork.Sections.Update(section);
             await _unitOfWork.SaveChangesAsync();
-
             var withUnits = await _unitOfWork.Sections.GetByIdWithUnitsAsync(sectionId);
             return MapSection(section, withUnits?.Units.Count ?? 0);
         }
@@ -58,8 +50,9 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var section = await _unitOfWork.Sections.GetByIdAsync(sectionId);
             if (section == null) return false;
-
+            // Fix: set BOTH IsPublished AND IsActive
             section.IsPublished = true;
+            section.IsActive = true;
             section.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.Sections.Update(section);
             await _unitOfWork.SaveChangesAsync();
@@ -70,8 +63,9 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var section = await _unitOfWork.Sections.GetByIdAsync(sectionId);
             if (section == null) return false;
-
+            // Fix: set BOTH IsPublished AND IsActive
             section.IsPublished = false;
+            section.IsActive = false;
             section.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.Sections.Update(section);
             await _unitOfWork.SaveChangesAsync();
@@ -82,7 +76,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var section = await _unitOfWork.Sections.GetByIdAsync(sectionId);
             if (section == null) return false;
-
             _unitOfWork.Sections.Delete(section);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -107,9 +100,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         public async Task<UnitResponse> CreateUnitAsync(CreateUnitRequest request)
         {
             var sectionExists = await _unitOfWork.Sections.GetByIdAsync(request.SectionId);
-            if (sectionExists == null)
-                throw new Exception("Section not found");
-
+            if (sectionExists == null) throw new Exception("Section not found");
             var unit = new Unit
             {
                 Title = request.Title,
@@ -122,10 +113,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 IsPublished = false,
                 IsActive = true
             };
-
             await _unitOfWork.Units.AddAsync(unit);
             await _unitOfWork.SaveChangesAsync();
-
             return MapUnit(unit, 0);
         }
 
@@ -133,7 +122,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var unit = await _unitOfWork.Units.GetByIdAsync(unitId)
                 ?? throw new Exception("Unit not found");
-
             unit.Title = request.Title;
             unit.Description = request.Description;
             unit.GuidebookContent = request.GuidebookContent;
@@ -142,10 +130,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             unit.XpReward = request.XpReward;
             unit.IsActive = request.IsActive;
             unit.UpdatedAt = DateTime.UtcNow;
-
             _unitOfWork.Units.Update(unit);
             await _unitOfWork.SaveChangesAsync();
-
             var withLessons = await _unitOfWork.Units.GetByIdWithLessonsAsync(unitId);
             return MapUnit(unit, withLessons?.Lessons.Count ?? 0);
         }
@@ -154,8 +140,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var unit = await _unitOfWork.Units.GetByIdAsync(unitId);
             if (unit == null) return false;
-
             unit.IsPublished = true;
+            unit.IsActive = true;
             unit.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.Units.Update(unit);
             await _unitOfWork.SaveChangesAsync();
@@ -166,8 +152,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var unit = await _unitOfWork.Units.GetByIdAsync(unitId);
             if (unit == null) return false;
-
             unit.IsPublished = false;
+            unit.IsActive = false;
             unit.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.Units.Update(unit);
             await _unitOfWork.SaveChangesAsync();
@@ -178,7 +164,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var unit = await _unitOfWork.Units.GetByIdAsync(unitId);
             if (unit == null) return false;
-
             _unitOfWork.Units.Delete(unit);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -188,13 +173,11 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var units = await _unitOfWork.Units.GetBySectionIdAsync(sectionId, publishedOnly: false);
             var result = new List<UnitResponse>();
-
             foreach (var unit in units)
             {
                 var withLessons = await _unitOfWork.Units.GetByIdWithLessonsAsync(unit.Id);
                 result.Add(MapUnit(unit, withLessons?.Lessons.Count ?? 0));
             }
-
             return result;
         }
 
@@ -211,9 +194,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         public async Task<AdminLessonResponse> CreateLessonAsync(CreateLessonRequest request)
         {
             var unitExists = await _unitOfWork.Units.GetByIdAsync(request.UnitId);
-            if (unitExists == null)
-                throw new Exception("Unit not found");
-
+            if (unitExists == null) throw new Exception("Unit not found");
             var lesson = new Lesson
             {
                 Title = request.Title,
@@ -224,10 +205,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 EstimatedMinutes = request.EstimatedMinutes,
                 IsActive = true
             };
-
             await _unitOfWork.Lessons.AddAsync(lesson);
             await _unitOfWork.SaveChangesAsync();
-
             return MapLesson(lesson, 0);
         }
 
@@ -235,7 +214,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var lesson = await _unitOfWork.Lessons.GetByIdAsync(lessonId)
                 ?? throw new Exception("Lesson not found");
-
             lesson.Title = request.Title;
             lesson.Description = request.Description;
             lesson.OrderIndex = request.OrderIndex;
@@ -243,10 +221,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             lesson.EstimatedMinutes = request.EstimatedMinutes;
             lesson.IsActive = request.IsActive;
             lesson.UpdatedAt = DateTime.UtcNow;
-
             _unitOfWork.Lessons.Update(lesson);
             await _unitOfWork.SaveChangesAsync();
-
             var withExercises = await _unitOfWork.Lessons.GetByIdWithExercisesAsync(lessonId);
             return MapLesson(lesson, withExercises?.Exercises.Count ?? 0);
         }
@@ -255,7 +231,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var lesson = await _unitOfWork.Lessons.GetByIdAsync(lessonId);
             if (lesson == null) return false;
-
             _unitOfWork.Lessons.Delete(lesson);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -265,13 +240,11 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var lessons = await _unitOfWork.Lessons.GetByUnitIdAsync(unitId);
             var result = new List<AdminLessonResponse>();
-
             foreach (var lesson in lessons)
             {
                 var withExercises = await _unitOfWork.Lessons.GetByIdWithExercisesAsync(lesson.Id);
                 result.Add(MapLesson(lesson, withExercises?.Exercises.Count ?? 0));
             }
-
             return result;
         }
 
@@ -288,9 +261,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         public async Task<ExerciseResponse> CreateExerciseAsync(CreateExerciseRequest request)
         {
             var lessonExists = await _unitOfWork.Lessons.GetByIdAsync(request.LessonId);
-            if (lessonExists == null)
-                throw new Exception("Lesson not found");
-
+            if (lessonExists == null) throw new Exception("Lesson not found");
             var exercise = new Exercise
             {
                 LessonId = request.LessonId,
@@ -303,10 +274,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 SentenceTemplate = request.SentenceTemplate,
                 XpReward = request.XpReward
             };
-
             await _unitOfWork.Exercises.AddAsync(exercise);
             await _unitOfWork.SaveChangesAsync();
-
             foreach (var opt in request.Options)
             {
                 var option = new ExerciseOption
@@ -320,9 +289,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 };
                 await _unitOfWork.Repository<ExerciseOption>().AddAsync(option);
             }
-
             await _unitOfWork.SaveChangesAsync();
-
             var withOptions = await _unitOfWork.Exercises.GetByIdWithOptionsAsync(exercise.Id);
             return MapExercise(withOptions!);
         }
@@ -331,7 +298,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var exercise = await _unitOfWork.Exercises.GetByIdWithOptionsAsync(exerciseId)
                 ?? throw new Exception("Exercise not found");
-
             exercise.Type = request.Type;
             exercise.OrderIndex = request.OrderIndex;
             exercise.Prompt = request.Prompt;
@@ -341,15 +307,11 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             exercise.SentenceTemplate = request.SentenceTemplate;
             exercise.XpReward = request.XpReward;
             exercise.UpdatedAt = DateTime.UtcNow;
-
-            // Replace all options (simplest approach for editing)
             var optionRepo = _unitOfWork.Repository<ExerciseOption>();
             foreach (var existingOption in exercise.Options.ToList())
                 optionRepo.Delete(existingOption);
-
             _unitOfWork.Exercises.Update(exercise);
             await _unitOfWork.SaveChangesAsync();
-
             foreach (var opt in request.Options)
             {
                 var option = new ExerciseOption
@@ -363,9 +325,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 };
                 await optionRepo.AddAsync(option);
             }
-
             await _unitOfWork.SaveChangesAsync();
-
             var updated = await _unitOfWork.Exercises.GetByIdWithOptionsAsync(exerciseId);
             return MapExercise(updated!);
         }
@@ -374,7 +334,6 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
         {
             var exercise = await _unitOfWork.Exercises.GetByIdAsync(exerciseId);
             if (exercise == null) return false;
-
             _unitOfWork.Exercises.Delete(exercise);
             await _unitOfWork.SaveChangesAsync();
             return true;
@@ -392,13 +351,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
 
         public async Task<Guid> CreateBranchAsync(CreateBranchRequest request)
         {
-            var branch = new Branch
-            {
-                Name = request.Name,
-                City = request.City,
-                State = request.State
-            };
-
+            var branch = new Branch { Name = request.Name, City = request.City, State = request.State };
             await _unitOfWork.Repository<Branch>().AddAsync(branch);
             await _unitOfWork.SaveChangesAsync();
             return branch.Id;
@@ -415,14 +368,13 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 ConditionType = request.ConditionType,
                 ConditionValue = request.ConditionValue
             };
-
             await _unitOfWork.Repository<Achievement>().AddAsync(achievement);
             await _unitOfWork.SaveChangesAsync();
             return achievement.Id;
         }
 
         // ═══════════════════════════════════════════════════════════
-        // MAPPERS
+        // MAPPERS — IsPublished drives the published state
         // ═══════════════════════════════════════════════════════════
 
         private static SectionResponse MapSection(Section s, int unitCount) => new()
@@ -432,7 +384,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             Description = s.Description,
             AgeGroup = s.AgeGroup.ToString(),
             OrderIndex = s.OrderIndex,
-            IsActive = s.IsActive,
+            IsActive = s.IsPublished,   // frontend reads isActive for badge
             UnitCount = unitCount
         };
 
@@ -446,7 +398,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             Category = u.Category.ToString(),
             OrderIndex = u.OrderIndex,
             XpReward = u.XpReward,
-            IsActive = u.IsActive,
+            IsActive = u.IsPublished,   // frontend reads isActive for badge
             LessonCount = lessonCount
         };
 
