@@ -166,7 +166,9 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             {
                 existingProgress.TimesReplayed += 1;
                 existingProgress.Score = Math.Max(existingProgress.Score, score);
-                _unitOfWork.Progresses.Update(existingProgress);
+                // NOTE: no explicit .Update() call — existingProgress was loaded through
+                // a tracked query, so EF's change tracker already sees these mutations
+                // and will generate the correct UPDATE on SaveChangesAsync().
                 await _unitOfWork.SaveChangesAsync();
 
                 return new CompleteLessonResponse
@@ -204,7 +206,16 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
 
             UpdateStreak(member);
 
-            _unitOfWork.Members.Update(member);
+            // NOTE: no explicit .Update(member) call here. `member` is already tracked
+            // (loaded via GetByIdWithDetailsAsync, which Includes Progresses), so EF's
+            // change tracker already sees the mutations above and will generate the
+            // right UPDATE for it on SaveChangesAsync(). Calling Update(member) was
+            // actively harmful here: it walks the whole reachable graph, and the new
+            // `progress` we just added above (which has a non-empty, client-generated
+            // Id from BaseEntity, and gets auto-linked into member.Progresses via EF's
+            // relationship fixup) could get its state flipped from Added to Modified —
+            // producing an UPDATE for a row that doesn't exist yet, which matches zero
+            // rows and throws exactly the concurrency exception seen in testing.
             await _unitOfWork.SaveChangesAsync();
 
             var unlockedAchievements = await _gamificationService.CheckAchievementsAsync(memberId);
