@@ -35,12 +35,14 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             return entryList.Select(e => new LeaderboardEntryDto
             {
                 Rank = e.Rank,
+                MemberId = e.MemberId,
                 MemberName = e.Member != null ? $"{e.Member.FirstName} {e.Member.LastName}" : "Unknown",
                 BranchName = e.Member?.Branch?.Name ?? string.Empty,
                 TotalXp = e.TotalXp,
                 CurrentStreak = e.CurrentStreak,
                 LessonsCompleted = e.LessonsCompleted,
-                CurrentLevel = e.Member?.CurrentLevel ?? 1
+                CurrentLevel = e.Member?.CurrentLevel ?? 1,
+                IsMe = e.MemberId == memberId
             }).ToList();
         }
     }

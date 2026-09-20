@@ -38,5 +38,10 @@ namespace WaqfENau.Api.Infrastructure.Interfaces.Services
         // Branch / Achievement (unchanged)
         Task<Guid> CreateBranchAsync(CreateBranchRequest request);
         Task<Guid> CreateAchievementAsync(CreateAchievementRequest request);
+
+        // Member management
+        Task<AdminMemberSummaryDto> CreateMurabbiAsync(CreateMurabbiRequest request);
+        Task<List<AdminMemberSummaryDto>> GetAllMembersAsync();
+        Task<List<BranchSummaryDto>> GetAllBranchesAsync();
     }
 }

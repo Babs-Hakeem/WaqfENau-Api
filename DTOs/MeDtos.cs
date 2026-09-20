@@ -103,6 +103,7 @@ namespace WaqfENau.Api.DTOs
 
     public class FriendDto
     {
+        public Guid FriendshipId { get; set; }
         public Guid MemberId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public int CurrentStreak { get; set; }

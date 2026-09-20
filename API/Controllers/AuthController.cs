@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WaqfENau.Api.DTOs;
+using WaqfENau.Api.Infrastructure.Interfaces.Repositories;
 using WaqfENau.Api.Infrastructure.Interfaces.Services;
+using WaqfENau.Api.Models.Entities;
 
 namespace WaqfENau.Api.API.Controllers
 {
@@ -9,10 +11,27 @@ namespace WaqfENau.Api.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IUnitOfWork unitOfWork)
         {
             _authService = authService;
+            _unitOfWork = unitOfWork;
+        }
+
+        /// <summary>
+        /// Public branch list for the registration form's branch picker.
+        /// Deliberately unauthenticated — a new user has no token yet.
+        /// Distinct from /admin/branches, which is NationalAdmin-only.
+        /// </summary>
+        [HttpGet("branches")]
+        public async Task<IActionResult> GetBranches()
+        {
+            var branches = await _unitOfWork.Repository<Branch>().GetAllAsync();
+            var result = branches
+                .OrderBy(b => b.Name)
+                .Select(b => new { id = b.Id, name = b.Name, city = b.City, state = b.State });
+            return Ok(result);
         }
 
         [HttpPost("register")]

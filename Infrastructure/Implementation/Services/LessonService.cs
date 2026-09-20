@@ -224,7 +224,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
             var nextLesson = (await _unitOfWork.Lessons.GetByUnitIdAsync(lesson.UnitId))
                 .Where(l => l.OrderIndex > lesson.OrderIndex)
                 .OrderBy(l => l.OrderIndex)
-                .Select(l => l.Title)
+                .Select(l => new { l.Id, l.Title })
                 .FirstOrDefault();
 
             return new CompleteLessonResponse
@@ -236,7 +236,8 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 CurrentStreak = member.Streak?.CurrentStreak ?? 0,
                 Score = score,
                 UnlockedAchievements = unlockedAchievements,
-                NextLessonTitle = nextLesson
+                NextLessonTitle = nextLesson?.Title,
+                NextLessonId = nextLesson?.Id
             };
         }
 

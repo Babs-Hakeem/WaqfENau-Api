@@ -2,16 +2,19 @@ using WaqfENau.Api.DTOs;
 using WaqfENau.Api.Infrastructure.Interfaces.Repositories;
 using WaqfENau.Api.Infrastructure.Interfaces.Services;
 using WaqfENau.Api.Models.Entities;
+using WaqfENau.Api.Models.Enums;
 
 namespace WaqfENau.Api.Infrastructure.Implementation.Services
 {
     public class AdminService : IAdminService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IIdentityService _identityService;
 
-        public AdminService(IUnitOfWork unitOfWork)
+        public AdminService(IUnitOfWork unitOfWork, IIdentityService identityService)
         {
             _unitOfWork = unitOfWork;
+            _identityService = identityService;
         }
 
 
@@ -437,5 +440,82 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 MatchGroupId = o.MatchGroupId
             }).ToList()
         };
+
+        // ═══════════════════════════════════════════════════════════
+        // MEMBER MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+
+        public async Task<AdminMemberSummaryDto> CreateMurabbiAsync(CreateMurabbiRequest request)
+        {
+            if (await _unitOfWork.Members.AnyAsync(m => m.Email == request.Email))
+                throw new Exception("Email already registered");
+
+            var branch = await _unitOfWork.Repository<Branch>().GetByIdAsync(request.BranchId)
+                ?? throw new Exception("Branch not found");
+
+            var member = new Member
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = _identityService.HashPassword(request.Password),
+                DateOfBirth = DateTime.UtcNow.AddYears(-25),
+                AgeGroup = AgeGroup.Youth16_Plus,
+                BranchId = request.BranchId,
+                Role = UserRole.Murabbi,
+                DailyGoalMinutes = 10
+            };
+
+            var streak = new Streak { MemberId = member.Id };
+            var hearts = new Hearts { MemberId = member.Id, Current = Hearts.Max };
+
+            await _unitOfWork.Members.AddAsync(member);
+            await _unitOfWork.Streaks.AddAsync(streak);
+            await _unitOfWork.Repository<Hearts>().AddAsync(hearts);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new AdminMemberSummaryDto
+            {
+                Id = member.Id,
+                FullName = $"{member.FirstName} {member.LastName}",
+                Email = member.Email,
+                Role = member.Role.ToString(),
+                AgeGroup = member.AgeGroup.ToString(),
+                BranchName = branch.Name,
+                BranchId = branch.Id,
+                CreatedAt = member.CreatedAt
+            };
+        }
+
+        public async Task<List<AdminMemberSummaryDto>> GetAllMembersAsync()
+        {
+            var members = await _unitOfWork.Members.GetAllAsync();
+            var branches = (await _unitOfWork.Repository<Branch>().GetAllAsync()).ToDictionary(b => b.Id, b => b.Name);
+
+            return members
+                .OrderByDescending(m => m.CreatedAt)
+                .Select(m => new AdminMemberSummaryDto
+                {
+                    Id = m.Id,
+                    FullName = $"{m.FirstName} {m.LastName}",
+                    Email = m.Email,
+                    Role = m.Role.ToString(),
+                    AgeGroup = m.AgeGroup.ToString(),
+                    BranchName = branches.TryGetValue(m.BranchId, out var name) ? name : string.Empty,
+                    BranchId = m.BranchId,
+                    CreatedAt = m.CreatedAt
+                })
+                .ToList();
+        }
+
+        public async Task<List<BranchSummaryDto>> GetAllBranchesAsync()
+        {
+            var branches = await _unitOfWork.Repository<Branch>().GetAllAsync();
+            return branches
+                .OrderBy(b => b.Name)
+                .Select(b => new BranchSummaryDto { Id = b.Id, Name = b.Name, City = b.City, State = b.State })
+                .ToList();
+        }
     }
 }

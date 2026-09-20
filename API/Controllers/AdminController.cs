@@ -292,5 +292,37 @@ namespace WaqfENau.Api.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // ═══════════════════════════════════════════════════════════
+        // MEMBER MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+
+        [HttpPost("murabbis")]
+        public async Task<IActionResult> CreateMurabbi([FromBody] CreateMurabbiRequest request)
+        {
+            try
+            {
+                var result = await _adminService.CreateMurabbiAsync(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("members")]
+        public async Task<IActionResult> GetAllMembers()
+        {
+            var members = await _adminService.GetAllMembersAsync();
+            return Ok(members);
+        }
+
+        [HttpGet("branches")]
+        public async Task<IActionResult> GetAllBranches()
+        {
+            var branches = await _adminService.GetAllBranchesAsync();
+            return Ok(branches);
+        }
     }
 }

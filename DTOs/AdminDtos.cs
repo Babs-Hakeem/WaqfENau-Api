@@ -248,4 +248,47 @@ namespace WaqfENau.Api.DTOs
 
         public int ConditionValue { get; set; }
     }
+
+    // ── MEMBER MANAGEMENT (admin creates/views branch staff & members) ────
+
+    public class CreateMurabbiRequest
+    {
+        [Required, MaxLength(100)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required, MaxLength(100)]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required, EmailAddress, MaxLength(255)]
+        public string Email { get; set; } = string.Empty;
+
+        [Required, MinLength(6), MaxLength(100)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        public Guid BranchId { get; set; }
+
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; } = string.Empty;
+    }
+
+    public class AdminMemberSummaryDto
+    {
+        public Guid Id { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string AgeGroup { get; set; } = string.Empty;
+        public string BranchName { get; set; } = string.Empty;
+        public Guid BranchId { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class BranchSummaryDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+    }
 }

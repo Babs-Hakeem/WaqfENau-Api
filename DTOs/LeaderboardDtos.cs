@@ -3,12 +3,14 @@
     public class LeaderboardEntryDto
     {
         public int Rank { get; set; }
+        public Guid MemberId { get; set; }
         public string MemberName { get; set; } = string.Empty;
         public string BranchName { get; set; } = string.Empty;
         public int TotalXp { get; set; }
         public int CurrentStreak { get; set; }
         public int LessonsCompleted { get; set; }
         public int CurrentLevel { get; set; }
+        public bool IsMe { get; set; }
     }
 
     public class LeaderboardRequest

@@ -98,6 +98,7 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
 
                 result.Add(new FriendDto
                 {
+                    FriendshipId = friendship.Id,
                     MemberId = friend.Id,
                     FullName = $"{friend.FirstName} {friend.LastName}",
                     CurrentStreak = friend.Streak?.CurrentStreak ?? 0,

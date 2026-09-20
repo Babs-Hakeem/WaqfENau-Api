@@ -89,6 +89,7 @@ namespace WaqfENau.Api.DTOs
         public int Score { get; set; }
         public List<string> UnlockedAchievements { get; set; } = new();
         public string? NextLessonTitle { get; set; }
+        public Guid? NextLessonId { get; set; }
         public string? Message { get; set; }
     }
 }
