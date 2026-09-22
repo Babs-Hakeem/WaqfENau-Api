@@ -284,7 +284,7 @@ namespace WaqfENau.Api.DTOs
         public DateTime CreatedAt { get; set; }
     }
 
-    public class BranchSummaryDto
+    public class BranchListItemDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

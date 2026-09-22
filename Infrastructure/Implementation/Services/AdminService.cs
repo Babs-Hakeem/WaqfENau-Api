@@ -509,12 +509,12 @@ namespace WaqfENau.Api.Infrastructure.Implementation.Services
                 .ToList();
         }
 
-        public async Task<List<BranchSummaryDto>> GetAllBranchesAsync()
+        public async Task<List<BranchListItemDto>> GetAllBranchesAsync()
         {
             var branches = await _unitOfWork.Repository<Branch>().GetAllAsync();
             return branches
                 .OrderBy(b => b.Name)
-                .Select(b => new BranchSummaryDto { Id = b.Id, Name = b.Name, City = b.City, State = b.State })
+                .Select(b => new BranchListItemDto { Id = b.Id, Name = b.Name, City = b.City, State = b.State })
                 .ToList();
         }
     }

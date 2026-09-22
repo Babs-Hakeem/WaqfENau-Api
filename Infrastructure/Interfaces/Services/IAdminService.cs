@@ -42,6 +42,6 @@ namespace WaqfENau.Api.Infrastructure.Interfaces.Services
         // Member management
         Task<AdminMemberSummaryDto> CreateMurabbiAsync(CreateMurabbiRequest request);
         Task<List<AdminMemberSummaryDto>> GetAllMembersAsync();
-        Task<List<BranchSummaryDto>> GetAllBranchesAsync();
+        Task<List<BranchListItemDto>> GetAllBranchesAsync();
     }
 }
